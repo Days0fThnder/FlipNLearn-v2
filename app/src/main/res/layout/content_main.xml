@@ -10,7 +10,57 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    android:background="@color/colorPrimaryDark"
+    android:gravity="center_vertical"
     tools:context="com.example.j_rus.flipnlearn_v2.app.MainActivity"
     tools:showIn="@layout/activity_main">
+
+    <TextView
+        android:id="@+id/welcome_Msg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/welcome_msg"
+        android:textAlignment="center"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="42dp"
+        android:textSize="24dp"
+        android:textColor="@color/colorAccent" />
+
+    <Button
+        android:id="@+id/create_new_deck_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_create_new_deck"
+        android:layout_below="@+id/welcome_Msg"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="44dp"
+        android:background="@color/colorAccent"
+        android:textColor="@android:color/black"
+        />
+
+    <Button
+        android:id="@+id/existing_deck_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_existing_new_deck"
+        android:layout_below="@+id/create_new_deck_btn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="44dp"
+        android:background="@color/colorAccent"
+        android:textColor="@android:color/black"
+        />
+    <Button
+        android:id="@+id/btn_users_deck"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_user_deck"
+        android:layout_below="@+id/existing_deck_btn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="44dp"
+        android:background="@color/colorAccent"
+        android:textColor="@android:color/black"
+        android:visibility="invisible"
+        />
 
 </RelativeLayout>

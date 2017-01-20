@@ -16,6 +16,16 @@
         android:padding="@dimen/activity_horizontal_margin">
 
 
+        <ImageButton
+            android:id="@+id/btn_close_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@android:drawable/ic_menu_close_clear_cancel"
+            android:layout_gravity="left"
+            android:elevation="0dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:background="@android:drawable/btn_dialog" />
+
         <ImageView
             android:layout_width="@dimen/logo_w_h"
             android:layout_height="@dimen/logo_w_h"

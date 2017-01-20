@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -11,6 +11,16 @@
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
+    <style name="LoginTheme" parent="AppTheme">
+        <item name="actionBarStyle">@style/ActionBar.Solid.FlipNLearn.NoTitle</item>
+    </style>
+
+    <!-- login activity action bar styles -->
+    <style name="ActionBar.Solid.FlipNLearn.NoTitle"
+        parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
