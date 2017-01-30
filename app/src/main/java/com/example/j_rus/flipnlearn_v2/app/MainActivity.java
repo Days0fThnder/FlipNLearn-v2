@@ -11,21 +11,24 @@ import android.view.View;
 import android.widget.Button;
 
 import com.example.j_rus.flipnlearn_v2.R;
+import com.facebook.login.LoginManager;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
-    private FirebaseAuth auth;
+    private FirebaseAuth auth = FirebaseAuth.getInstance();;
     private Button createNewCardDeck;
     private Button existingDeck;
     private Button userDeck;
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        auth = FirebaseAuth.getInstance();
+        //auth
         createNewCardDeck = (Button) findViewById(R.id.create_new_deck_btn);
         existingDeck = (Button) findViewById(R.id.existing_deck_btn);
         userDeck = (Button) findViewById(R.id.btn_users_deck);
@@ -63,7 +66,9 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         //Get Firebase auth instance
-        auth = FirebaseAuth.getInstance();
+        //auth = FirebaseAuth.getInstance();
+        //Signed in google user's info
+
         MenuItem signOut = menu.findItem(R.id.action_sign_out);
         if(auth.getCurrentUser() != null){
             signOut.setVisible(true);
@@ -79,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
@@ -88,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.action_sign_out) {
             auth.signOut();
+            LoginManager.getInstance().logOut();
             // this listener will be called when there is change in firebase user session
             FirebaseAuth.AuthStateListener authListener = new FirebaseAuth.AuthStateListener() {
                 @Override
@@ -99,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             };
+
             authListener.onAuthStateChanged(auth);
             return true;
         }
