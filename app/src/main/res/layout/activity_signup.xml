@@ -24,6 +24,7 @@
             android:src="@mipmap/ic_launcher" />
 
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/input_layout_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -40,6 +41,7 @@
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/input_layout_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -58,17 +60,26 @@
 
         </android.support.design.widget.TextInputLayout>
 
+
         <Button
             android:id="@+id/sign_up_button"
             style="?android:textAppearanceSmall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:background="@color/colorAccent"
+            android:background="@color/btn_bg"
             android:text="@string/action_sign_up_short"
             android:textColor="@android:color/black"
             android:textStyle="bold" />
 
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/sign_up_error_msg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dip">
+
+        </android.support.design.widget.TextInputLayout>
         <Button
             android:id="@+id/btn_reset_password"
             android:layout_width="fill_parent"
