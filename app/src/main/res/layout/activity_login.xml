@@ -7,6 +7,14 @@
     android:fitsSystemWindows="true"
     tools:context="com.example.j_rus.flipnlearn_v2.app.LoginActivity">
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center|bottom"
+        android:layout_marginBottom="20dp"
+        android:visibility="gone" />
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -36,7 +44,6 @@
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
             <EditText
                 android:id="@+id/email"
                 android:layout_width="match_parent"
@@ -68,38 +75,31 @@
         <Button
             android:id="@+id/btn_login"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_marginTop="10dip"
-            android:background="@color/colorAccent"
+            android:background="@color/btn_login_bg"
             android:text="@string/btn_login"
             android:textColor="@android:color/black" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:background="@color/colorPrimary"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
             <com.google.android.gms.common.SignInButton
                 android:id="@+id/btn_google_login"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:background="@null"
-                android:text="@string/btn_sign_in_google"
-                android:textColor="@android:color/black"
-                android:backgroundTint="@color/common_google_signin_btn_text_dark_default"
-                android:elevation="1dp" />
+                android:layout_width="150dp"
+                android:layout_height="35dp"
+                />
 
             <com.facebook.login.widget.LoginButton
                 android:id="@+id/btn_facebook_login"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="5dp"
-                android:layout_below="@+id/btn_google_login"
-                android:layout_marginBottom="5dp" />
+                android:layout_width="150dp"
+                android:layout_height="500dp" />
+
         </LinearLayout>
 
 
@@ -110,8 +110,8 @@
             android:layout_marginTop="10dip"
             android:background="@null"
             android:text="@string/btn_forgot_password"
-            android:textAllCaps="false"
-            android:textColor="@color/colorAccent" />
+            android:textColor="@color/colorAccent"
+            android:textAllCaps="false" />
 
         <!-- Link to Login Screen -->
 
@@ -126,12 +126,4 @@
             android:textColor="@color/white"
             android:textSize="15dp" />
     </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_gravity="center|bottom"
-        android:layout_marginBottom="20dp"
-        android:visibility="gone" />
 </android.support.design.widget.CoordinatorLayout>

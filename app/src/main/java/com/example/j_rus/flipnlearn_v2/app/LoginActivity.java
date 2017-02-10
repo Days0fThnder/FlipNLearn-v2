@@ -20,6 +20,7 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
@@ -37,6 +38,8 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import java.util.Arrays;
+
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
     private EditText inputEmail, inputPassword;
@@ -45,7 +48,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private Button btnSignup, btnLogin, btnReset;
     private ImageButton btnClose;
     private SignInButton btnGoogleSignIn;
-    private LoginButton loginButton;
+    private LoginButton btnFbSignIn;
     private GoogleApiClient mGoogleApiClient;
     private CallbackManager mCallbackManager;
     private static final int RC_SIGN_IN = 9001;
@@ -89,12 +92,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         btnSignup = (Button) findViewById(R.id.btn_signup);
         btnLogin = (Button) findViewById(R.id.btn_login);
         btnGoogleSignIn = (SignInButton) findViewById(R.id.btn_google_login);
-        loginButton = (LoginButton) findViewById(R.id.btn_facebook_login);
+        btnFbSignIn = (LoginButton) findViewById(R.id.btn_facebook_login);
         btnReset = (Button) findViewById(R.id.btn_reset_password);
         btnClose = (ImageButton) findViewById(R.id.btn_close_login);
 
 
-        btnGoogleSignIn.setSize(SignInButton.SIZE_WIDE);
+        btnFbSignIn.setHeight(700);
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
 
@@ -161,8 +164,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             }
         });
 
-        loginButton.setReadPermissions("email", "public_profile");
-        loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+
+        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Log.d(logTag, "facebook:onSuccess:" + loginResult);
@@ -211,6 +214,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         switch (view.getId()) {
             case R.id.btn_google_login:
                 signIn();
+                break;
+            case R.id.btn_facebook_login:
+                LoginManager.getInstance().logInWithReadPermissions(
+                    this,
+                    Arrays.asList("user_photos", "email", "user_birthday", "public_profile")
+                );
                 break;
             default:
                 return;
