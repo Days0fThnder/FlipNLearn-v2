@@ -18,7 +18,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
-    private FirebaseAuth auth = FirebaseAuth.getInstance();;
+    private FirebaseAuth auth;
     private Button createNewCardDeck;
     private Button existingDeck;
     private Button userDeck;
@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //auth
+        auth = FirebaseAuth.getInstance();
         createNewCardDeck = (Button) findViewById(R.id.create_new_deck_btn);
         existingDeck = (Button) findViewById(R.id.existing_deck_btn);
         userDeck = (Button) findViewById(R.id.btn_users_deck);
@@ -101,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
                     if (user == null) {
                         // user auth state is changed - user is null
                         finish();
+                        startActivity(getIntent());
                     }
                 }
             };
@@ -109,6 +111,11 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 
 }

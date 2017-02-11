@@ -6,21 +6,24 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
+import com.example.j_rus.fliplearn.util.Constants;
 import com.example.j_rus.flipnlearn_v2.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+
+import static com.example.j_rus.fliplearn.util.UserManager.isValidEmail;
 
 public class SignupActivity extends AppCompatActivity {
 
@@ -29,7 +32,7 @@ public class SignupActivity extends AppCompatActivity {
     private TextInputLayout inputLayoutErrorMsg, inputLayoutEmail, inputLayoutPassword;
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
-    private final String regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$";
+
     private String email;
     private String password;
     static final String logTag = "SignupActivity";
@@ -60,6 +63,9 @@ public class SignupActivity extends AppCompatActivity {
 
         inputEmail.addTextChangedListener(new MyTextWatcher(inputEmail));
         inputPassword.addTextChangedListener(new MyTextWatcher(inputPassword));
+
+        //animation
+        final Animation animShake = AnimationUtils.loadAnimation(this, R.anim.shake);
 
         btnResetPassword.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,12 +102,13 @@ public class SignupActivity extends AppCompatActivity {
                         .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
-                                Toast.makeText(SignupActivity.this, "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
+                                Log.d(logTag, "createUserWithEmail:onComplete:" + task.isSuccessful());
                                 progressBar.setVisibility(View.GONE);
                                 // If sign in fails, display a message to the user. If sign in succeeds
                                 // the auth state listener will be notified and logic to handle the
                                 // signed in user can be handled in the listener.
                                 if (!task.isSuccessful()) {
+                                    btnSignUp.startAnimation(animShake);
                                     inputLayoutErrorMsg.setError(getString(R.string.sign_up_error_msg));
                                     Log.d(logTag,"Authentication failed." + task.getException());
                                 } else {
@@ -131,7 +138,7 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private boolean validatePassword() {
-        if (inputPassword.getText().toString().trim().isEmpty() || !inputPassword.getText().toString().matches(regexp)) {
+        if (inputPassword.getText().toString().trim().isEmpty() || !inputPassword.getText().toString().matches(Constants.REGEX_PW)) {
             inputLayoutPassword.setError(getString(R.string.minimum_password));
             requestFocus(inputPassword);
 
@@ -146,7 +153,7 @@ public class SignupActivity extends AppCompatActivity {
     private boolean activateSignUpButton(){
         String email = inputEmail.getText().toString().trim();
         if ((!inputPassword.getText().toString().trim().isEmpty() &&
-                inputPassword.getText().toString().matches(regexp)) &&
+                inputPassword.getText().toString().matches(Constants.REGEX_PW)) &&
                 (!email.isEmpty() && isValidEmail(email))) {
             Log.d(logTag, "True");
             return true;
@@ -155,9 +162,7 @@ public class SignupActivity extends AppCompatActivity {
         return false;
     }
 
-    private static boolean isValidEmail(String email) {
-        return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
-    }
+
 
     private void requestFocus(View view) {
         if (view.requestFocus()) {

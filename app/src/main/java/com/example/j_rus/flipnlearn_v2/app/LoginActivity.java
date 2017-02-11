@@ -3,18 +3,22 @@ package com.example.j_rus.flipnlearn_v2.app;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.j_rus.fliplearn.util.UserManager;
 import com.example.j_rus.flipnlearn_v2.R;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -49,6 +53,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private ImageButton btnClose;
     private SignInButton btnGoogleSignIn;
     private LoginButton btnFbSignIn;
+    private TextInputLayout inputLayoutErrorMsg;
     private GoogleApiClient mGoogleApiClient;
     private CallbackManager mCallbackManager;
     private static final int RC_SIGN_IN = 9001;
@@ -95,9 +100,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         btnFbSignIn = (LoginButton) findViewById(R.id.btn_facebook_login);
         btnReset = (Button) findViewById(R.id.btn_reset_password);
         btnClose = (ImageButton) findViewById(R.id.btn_close_login);
+        inputLayoutErrorMsg = (TextInputLayout) findViewById(R.id.sign_in_error_msg);
+
+        //animation
+        final Animation animShake = AnimationUtils.loadAnimation(this, R.anim.shake);
 
 
-        btnFbSignIn.setHeight(700);
+        btnFbSignIn.setHeight(750);
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
 
@@ -124,22 +133,30 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             @Override
             public void onClick(View v) {
                 String email = inputEmail.getText().toString();
-                final String password = inputPassword.getText().toString();
+                String password = inputPassword.getText().toString();
 
-                if (TextUtils.isEmpty(email)) {
-                    Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
+                if (TextUtils.isEmpty(email) ) {
+                    btnLogin.startAnimation(animShake);
+                    inputLayoutErrorMsg.setError(getString(R.string.no_email_entered));
                     return;
+                } else if(!UserManager.isValidEmail(email)){
+                    btnLogin.startAnimation(animShake);
+                    inputLayoutErrorMsg.setError(getString(R.string.error_invalid_email));
+                    return;
+                } else{
+                    inputLayoutErrorMsg.setErrorEnabled(false);
                 }
 
                 if (TextUtils.isEmpty(password)) {
-                    Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
+                    btnLogin.startAnimation(animShake);
+                    inputLayoutErrorMsg.setError(getString(R.string.no_password_entered));
                     return;
                 }
 
                 progressBar.setVisibility(View.VISIBLE);
 
                 //authenticate user
-                auth.signInWithEmailAndPassword(email, password)
+                auth.signInWithEmailAndPassword(email, inputPassword.getText().toString())
                         .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -149,13 +166,15 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                 progressBar.setVisibility(View.GONE);
                                 if (!task.isSuccessful()) {
                                     // there was an error
-                                    if (password.length() < 6) {
+                                    if (inputPassword.getText().toString().length() < 6) {
                                         inputPassword.setError(getString(R.string.minimum_password));
                                     } else {
-                                        Toast.makeText(LoginActivity.this, getString(R.string.auth_failed), Toast.LENGTH_LONG).show();
+                                        btnLogin.startAnimation(animShake);
+                                        inputLayoutErrorMsg.setError(getString(R.string.auth_failed));
                                     }
                                 } else {
                                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                     startActivity(intent);
                                     finish();
                                 }

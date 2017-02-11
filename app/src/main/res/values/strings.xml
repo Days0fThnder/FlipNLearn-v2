@@ -52,6 +52,8 @@
     <string name="facebook_app_id">186567971821870</string>
 
     <string name="sign_up_error_msg">The email address is already in use by another account.</string>
+    <string name="no_email_entered">"Enter email address!"</string>
+    <string name="no_password_entered">"Enter password!"</string>
 
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
