@@ -16,6 +16,17 @@
     tools:showIn="@layout/activity_main">
 
     <TextView
+        android:id="@+id/welcome_user_msg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textAlignment="center"
+        android:gravity="center_vertical"
+        android:textSize="30dp"
+        android:layout_marginBottom="70dp"
+        />
+
+    <TextView
         android:id="@+id/welcome_Msg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

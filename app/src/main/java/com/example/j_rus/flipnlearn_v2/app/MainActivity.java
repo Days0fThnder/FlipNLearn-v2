@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.j_rus.flipnlearn_v2.R;
 import com.facebook.login.LoginManager;
@@ -23,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private Button existingDeck;
     private Button userDeck;
     private GoogleApiClient mGoogleApiClient;
+    private TextView userName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +35,15 @@ public class MainActivity extends AppCompatActivity {
         createNewCardDeck = (Button) findViewById(R.id.create_new_deck_btn);
         existingDeck = (Button) findViewById(R.id.existing_deck_btn);
         userDeck = (Button) findViewById(R.id.btn_users_deck);
+        userName = (TextView) findViewById(R.id.welcome_user_msg);
 
-        if(auth.getCurrentUser() != null){
+        FirebaseUser user = auth.getInstance().getCurrentUser();
+
+        if(user != null){
+
+            String name = user.getDisplayName();
+            String email = user.getEmail();
+            userName.setText(name);
             userDeck.setVisibility(View.VISIBLE);
         }
 
@@ -71,10 +80,14 @@ public class MainActivity extends AppCompatActivity {
         //Signed in google user's info
 
         MenuItem signOut = menu.findItem(R.id.action_sign_out);
+        MenuItem signIn = menu.findItem(R.id.action_sign_in);
         if(auth.getCurrentUser() != null){
             signOut.setVisible(true);
+            signIn.setVisible(false);
         }else{
+            signIn.setVisible(true);
             signOut.setVisible(false);
+
         }
         return true;
     }
@@ -109,6 +122,10 @@ public class MainActivity extends AppCompatActivity {
 
             authListener.onAuthStateChanged(auth);
             return true;
+        }
+
+        if (id == R.id.action_sign_in) {
+            startActivity(new Intent(this, LoginActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }

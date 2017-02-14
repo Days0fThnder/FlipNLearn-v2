@@ -15,6 +15,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.j_rus.fliplearn.util.Constants;
 import com.example.j_rus.flipnlearn_v2.R;
@@ -22,16 +23,19 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 import static com.example.j_rus.fliplearn.util.UserManager.isValidEmail;
 
 public class SignupActivity extends AppCompatActivity {
 
-    private EditText inputEmail, inputPassword;
+    private EditText inputName, inputEmail, inputPassword;
     private Button btnSignIn, btnSignUp, btnResetPassword;
-    private TextInputLayout inputLayoutErrorMsg, inputLayoutEmail, inputLayoutPassword;
+    private TextInputLayout inputLayoutName, inputLayoutErrorMsg, inputLayoutEmail, inputLayoutPassword;
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     private String email;
     private String password;
@@ -47,11 +51,14 @@ public class SignupActivity extends AppCompatActivity {
 
         btnSignIn = (Button) findViewById(R.id.sign_in_button);
         btnSignUp = (Button) findViewById(R.id.sign_up_button);
+
+        inputName = (EditText) findViewById(R.id.user_name);
         inputEmail = (EditText) findViewById(R.id.email);
         inputPassword = (EditText) findViewById(R.id.password);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         btnResetPassword = (Button) findViewById(R.id.btn_reset_password);
 
+        inputLayoutName = (TextInputLayout) findViewById(R.id.input_layout_user_name);
         inputLayoutEmail = (TextInputLayout) findViewById(R.id.input_layout_email);
         inputLayoutPassword = (TextInputLayout) findViewById(R.id.input_layout_password);
         inputLayoutErrorMsg = (TextInputLayout) findViewById(R.id.sign_up_error_msg);
@@ -112,7 +119,11 @@ public class SignupActivity extends AppCompatActivity {
                                     inputLayoutErrorMsg.setError(getString(R.string.sign_up_error_msg));
                                     Log.d(logTag,"Authentication failed." + task.getException());
                                 } else {
-                                    startActivity(new Intent(SignupActivity.this, MainActivity.class));
+                                    String user_name = inputName.getText().toString().trim();
+                                    updateUserName(user_name);
+                                    Toast.makeText(SignupActivity.this, "You have successfully created your account, You can login now!",
+                                            Toast.LENGTH_LONG).show();
+                                    startActivity(new Intent(SignupActivity.this, LoginActivity.class));
                                     finish();
                                 }
                             }
@@ -120,7 +131,62 @@ public class SignupActivity extends AppCompatActivity {
             }
         });
 
+       mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                String user_name = inputName.getText().toString().trim();
+                FirebaseUser user = mAuth.getCurrentUser();
+                if(user!=null){
+                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                            .setDisplayName(user_name).build();
+                    user.updateProfile(profileUpdates);
+                }
+            }
+        };
+
     }
+
+    private void updateUserName(String name) {
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        UserProfileChangeRequest updates = new UserProfileChangeRequest.Builder()
+                .setDisplayName(name).build();
+        user.updateProfile(updates).addOnCompleteListener(this, new OnCompleteListener<Void>() {
+
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+                if( task.isSuccessful() ) {
+
+                    Log.d(logTag, "Updated");
+                }
+            }
+        });
+    }
+
+    private void LogIn(){
+        mAuth.signInWithEmailAndPassword(email, inputPassword.getText().toString())
+                .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
+
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (!task.isSuccessful()) {
+                            // there was an error
+                            if (inputPassword.getText().toString().length() < 6) {
+                                inputPassword.setError(getString(R.string.minimum_password));
+                            } else {
+                                inputLayoutErrorMsg.setError(getString(R.string.auth_failed));
+                            }
+                        } else {
+                            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+                            finish();
+                        }
+                    }
+                });
+    }
+
 
     private boolean validateEmail() {
         email = inputEmail.getText().toString().trim();
@@ -210,5 +276,14 @@ public class SignupActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         progressBar.setVisibility(View.GONE);
+        //mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        if(mAuthListener != null){
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
     }
 }

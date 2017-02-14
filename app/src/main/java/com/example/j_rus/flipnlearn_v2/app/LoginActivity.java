@@ -83,11 +83,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // Initialize Facebook Login button
         mCallbackManager = CallbackManager.Factory.create();
 
-        if (auth.getCurrentUser() != null) {
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-            finish();
-        }
-
         // set the view now
         setContentView(R.layout.activity_login);
 
