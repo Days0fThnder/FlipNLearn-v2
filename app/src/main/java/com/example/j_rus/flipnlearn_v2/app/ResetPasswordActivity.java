@@ -1,5 +1,6 @@
 package com.example.j_rus.flipnlearn_v2.app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
@@ -80,9 +81,12 @@ public class ResetPasswordActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(ResetPasswordActivity.this, "We have sent you instructions " +
-                                            "to reset your password!",
-                                            Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(ResetPasswordActivity.this, MainActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
+                                    finish();
+                                    Toast.makeText(ResetPasswordActivity.this, getString(R.string.password_reset_msg),
+                                            Toast.LENGTH_LONG).show();
                                 } else {
                                     inputLayoutErrorMsg.setError(getString(R.string.failed_send_email));
                                     btnReset.startAnimation(animShake);

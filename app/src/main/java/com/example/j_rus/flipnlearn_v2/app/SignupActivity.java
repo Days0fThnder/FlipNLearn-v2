@@ -276,7 +276,7 @@ public class SignupActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         progressBar.setVisibility(View.GONE);
-        //mAuth.addAuthStateListener(mAuthListener);
+        mAuth.addAuthStateListener(mAuthListener);
     }
 
     @Override

@@ -3,7 +3,7 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="com.example.j_rus.flipnlearn_v2.app.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="com.example.j_rus.flipnlearn_v2.app.SettingsActivity$AccountPreferenceFragment"
         android:icon="@drawable/ic_info_black_24dp"
         android:title="@string/pref_header_general" />
 

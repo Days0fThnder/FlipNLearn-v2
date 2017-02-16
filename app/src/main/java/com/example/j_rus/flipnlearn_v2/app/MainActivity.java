@@ -40,9 +40,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser user = auth.getInstance().getCurrentUser();
 
         if(user != null){
-
             String name = user.getDisplayName();
-            String email = user.getEmail();
             userName.setText(name);
             userDeck.setVisibility(View.VISIBLE);
         }

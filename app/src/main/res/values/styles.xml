@@ -19,12 +19,19 @@
     </style>
 
     <!-- login activity action bar styles -->
-    <style name="ActionBar.Solid.FlipNLearn.NoTitle"
-        parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-    </style>
+    <style name="ActionBar.Solid.FlipNLearn.NoTitle" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse"></style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="FacebookLoginButton">
+        <item name="android:textSize">@dimen/com_facebook_button_login_corner_radius</item>
+        <item name="android:background">@drawable/com_facebook_button_icon</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:radius">100dp</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+    </style>
 
 </resources>
