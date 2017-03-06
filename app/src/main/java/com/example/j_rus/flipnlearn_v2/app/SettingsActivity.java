@@ -2,6 +2,7 @@ package com.example.j_rus.flipnlearn_v2.app;
 
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -16,12 +17,26 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.example.j_rus.fliplearn.util.UserManager;
 import com.example.j_rus.flipnlearn_v2.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 
@@ -42,6 +57,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * to reflect its new value.
      */
     private Header hd;
+
+    private static Activity mActivity;
+    private static Context mContext;
 
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
@@ -125,6 +143,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mActivity = this;
+        mContext = this;
         setupActionBar();
 
 
@@ -187,21 +207,122 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class AccountPreferenceFragment extends PreferenceFragment {
+        private Button btnChangeEmail, btnChangePassword, btnSendResetEmail, btnRemoveUser,
+                changeEmail, changePassword, sendEmail, remove, signOut, btnCancel;
 
+        private EditText oldEmail, newEmail, password, newPassword;
+        private TextInputLayout inputLayoutNewEmail;
+        private ProgressBar progressBar;
+        private FirebaseAuth auth;
+        //get current user
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        final UserManager userManager = new UserManager();
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             //addPreferencesFromResource(R.xml.pref_account);
+            //get firebase auth instance
+            auth = FirebaseAuth.getInstance();
+
+            FirebaseAuth.AuthStateListener authListener = new FirebaseAuth.AuthStateListener() {
+                @Override
+                public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                    FirebaseUser user = firebaseAuth.getCurrentUser();
+                    if (user == null) {
+                        // user auth state is changed - user is null
+                        // launch login activity
+                        mActivity.finish();
+                        startActivity(new Intent(mActivity, LoginActivity.class));
+
+
+                    }
+                }
+            };
+            authListener.onAuthStateChanged(auth);
             setHasOptionsMenu(true);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            //bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_title_display_name)));
-            //bindPreferenceSummaryToValue(findPreference("example_list"),"test", );
         }
+
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState){
+            View accountView = inflater.inflate(R.layout.fragment_account_settings, container, false);
+            btnChangeEmail = (Button) accountView.findViewById(R.id.change_email_button);
+            btnChangePassword = (Button) accountView.findViewById(R.id.change_password_button);
+            btnSendResetEmail = (Button) accountView.findViewById(R.id.sending_pass_reset_button);
+            btnRemoveUser = (Button) accountView.findViewById(R.id.remove_user_button);
+            btnCancel = (Button) accountView.findViewById(R.id.btn_cancel);
+            changeEmail = (Button) accountView.findViewById(R.id.changeEmail);
+            changePassword = (Button) accountView.findViewById(R.id.changePass);
+            sendEmail = (Button) accountView.findViewById(R.id.send);
+            remove = (Button) accountView.findViewById(R.id.remove);
+            signOut = (Button) accountView.findViewById(R.id.sign_out);
+
+            inputLayoutNewEmail = (TextInputLayout)accountView.findViewById(R.id.input_layout_new_email);
+
+            oldEmail = (EditText) accountView.findViewById(R.id.old_email);
+            newEmail = (EditText) accountView.findViewById(R.id.new_email);
+            password = (EditText) accountView.findViewById(R.id.password);
+            newPassword = (EditText) accountView.findViewById(R.id.newPassword);
+
+            progressBar = (ProgressBar) accountView.findViewById(R.id.progressBar);
+
+            oldEmail.setVisibility(View.GONE);
+            newEmail.setVisibility(View.GONE);
+            password.setVisibility(View.GONE);
+            newPassword.setVisibility(View.GONE);
+            changeEmail.setVisibility(View.GONE);
+            changePassword.setVisibility(View.GONE);
+            sendEmail.setVisibility(View.GONE);
+            remove.setVisibility(View.GONE);
+            btnCancel.setVisibility(View.GONE);
+
+            btnChangeEmail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    oldEmail.setVisibility(View.GONE);
+                    newEmail.setVisibility(View.VISIBLE);
+                    password.setVisibility(View.GONE);
+                    newPassword.setVisibility(View.GONE);
+                    changeEmail.setVisibility(View.VISIBLE);
+                    changePassword.setVisibility(View.GONE);
+                    sendEmail.setVisibility(View.GONE);
+                    remove.setVisibility(View.GONE);
+                    btnCancel.setVisibility(View.VISIBLE);
+                }
+            });
+            changeEmail.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                   if( !userManager.validateEmail(newEmail, inputLayoutNewEmail, mContext, mActivity)){
+                       return;
+                   }
+                    progressBar.setVisibility(View.VISIBLE);
+                    if (user != null && !newEmail.getText().toString().trim().equals("")) {
+                        user.updateEmail(newEmail.getText().toString().trim())
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Toast.makeText(mActivity, "Email address is updated. An email was sent to your new address", Toast.LENGTH_LONG).show();
+                                            progressBar.setVisibility(View.GONE);
+                                        } else {
+                                            Toast.makeText(mActivity, "Failed to update email!", Toast.LENGTH_LONG).show();
+                                            progressBar.setVisibility(View.GONE);
+                                        }
+                                    }
+                                });
+                    } else if (newEmail.getText().toString().trim().equals("")) {
+                        newEmail.setError("Enter email");
+                        progressBar.setVisibility(View.GONE);
+                    }
+                }
+            });
+            return accountView;
+        }
+
+        //btnCancel.
 
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
@@ -213,18 +334,29 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return super.onOptionsItemSelected(item);
         }
 
+        //sign out method
+        public void signOut() {
+            auth.signOut();
+        }
+
         /*@Override
         public void onResume() {
             super.onResume();
-            auth.addAuthStateListener(mAuthListener);
+            auth.addAuthStateListener(authListener);
+        }
+
+        @Override
+        public void onStart() {
+            super.onStart();
+            auth.addAuthStateListener(authListener);
         }
 
         @Override
         public void onStop(){
             super.onStop();
-        /*if(mAuthListener != null){
-            auth.removeAuthStateListener(mAuthListener);
-        }
+            if(authListener != null){
+                auth.removeAuthStateListener(authListener);
+            }
         }*/
     }
 

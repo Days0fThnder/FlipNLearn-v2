@@ -55,6 +55,7 @@
     <string name="failed_send_email">Failed to send reset email!</string>
     <string name="password_reset_msg">"We have sent you instructions to reset your password!"</string>
     <string name="facebook_app_id">186567971821870</string>
+    <string name="cancel_text">Cancel</string>
 
     <string name="sign_up_error_msg">The email address is already in use by another account.</string>
     <string name="no_email_entered">"Enter email address!"</string>

@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.j_rus.fliplearn.util.Constants;
+import com.example.j_rus.fliplearn.util.UserManager;
 import com.example.j_rus.flipnlearn_v2.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -36,6 +37,7 @@ public class SignupActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private UserManager userManager = new UserManager();
 
     private String email;
     private String password;
@@ -95,11 +97,12 @@ public class SignupActivity extends AppCompatActivity {
                 email = inputEmail.getText().toString().trim();
                 password = inputPassword.getText().toString().trim();
 
-                if (!validateEmail()) {
+                if (!userManager.validateEmail(inputEmail, inputLayoutEmail, getApplicationContext(), SignupActivity.this)) {
                     return;
                 }
 
-                if (!validatePassword()) {
+                if (!userManager.validatePassword(inputPassword, inputLayoutPassword,
+                        getApplicationContext(), SignupActivity.this)) {
                     return;
                 }
 
@@ -164,58 +167,6 @@ public class SignupActivity extends AppCompatActivity {
         });
     }
 
-    private void LogIn(){
-        mAuth.signInWithEmailAndPassword(email, inputPassword.getText().toString())
-                .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
-
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (!task.isSuccessful()) {
-                            // there was an error
-                            if (inputPassword.getText().toString().length() < 6) {
-                                inputPassword.setError(getString(R.string.minimum_password));
-                            } else {
-                                inputLayoutErrorMsg.setError(getString(R.string.auth_failed));
-                            }
-                        } else {
-                            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
-                            finish();
-                        }
-                    }
-                });
-    }
-
-
-    private boolean validateEmail() {
-        email = inputEmail.getText().toString().trim();
-
-        if (email.isEmpty() || !isValidEmail(email)) {
-            inputLayoutEmail.setError(getString(R.string.error_invalid_email));
-            requestFocus(inputEmail);
-            return false;
-        } else {
-            inputLayoutEmail.setErrorEnabled(false);
-            requestFocus(inputEmail);
-        }
-
-        return true;
-    }
-
-    private boolean validatePassword() {
-        if (inputPassword.getText().toString().trim().isEmpty() || !inputPassword.getText().toString().matches(Constants.REGEX_PW)) {
-            inputLayoutPassword.setError(getString(R.string.minimum_password));
-            requestFocus(inputPassword);
-
-            return false;
-        } else {
-            inputLayoutPassword.setErrorEnabled(false);
-        }
-
-        return true;
-    }
-
     private boolean activateSignUpButton(){
         String email = inputEmail.getText().toString().trim();
         if ((!inputPassword.getText().toString().trim().isEmpty() &&
@@ -263,10 +214,12 @@ public class SignupActivity extends AppCompatActivity {
         public void afterTextChanged(Editable editable) {
             switch (view.getId()) {
                 case R.id.email:
-                    validateEmail();
+                    userManager.validateEmail(inputEmail, inputLayoutEmail, getApplicationContext(),
+                            SignupActivity.this);
                     break;
                 case R.id.password:
-                    validatePassword();
+                    userManager.validatePassword(inputPassword, inputLayoutPassword,
+                            getApplicationContext(), SignupActivity.this);
                     break;
             }
         }

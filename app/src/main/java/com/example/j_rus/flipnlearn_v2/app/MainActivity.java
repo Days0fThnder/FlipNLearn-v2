@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                     if (user == null) {
                         // user auth state is changed - user is null
                         finish();
-                        startActivity(getIntent());
+                        startActivity(new Intent(MainActivity.this, MainActivity.class));
                     }
                 }
             };
