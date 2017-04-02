@@ -10,6 +10,8 @@ import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.example.j_rus.flipnlearn_v2.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -21,6 +23,7 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 public class UserManager {
 
     private FirebaseAuth auth;
+    private boolean isUpdated = false;
 
     public static boolean isValidEmail(String email) {
         return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
@@ -30,19 +33,21 @@ public class UserManager {
 
     }
 
-    public void updateUserName(final FirebaseAuth mAuth, final String name) {
-        FirebaseAuth.AuthStateListener mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+    public boolean updateUserName(FirebaseUser user,  String name) {
 
-                FirebaseUser user = mAuth.getCurrentUser();
-                if (user != null) {
-                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                            .setDisplayName(name).build();
-                    user.updateProfile(profileUpdates);
+        if (user != null) {
+            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                    .setDisplayName(name).build();
+            user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()){
+                        isUpdated = true;
+                    }
                 }
-            }
-        };
+            });
+        }
+        return isUpdated;
     }
 
     public boolean validateEmail(EditText inputEmail, TextInputLayout inputLayoutEmail,

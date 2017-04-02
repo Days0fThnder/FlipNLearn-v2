@@ -22,21 +22,28 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.j_rus.fliplearn.util.UserManager;
 import com.example.j_rus.flipnlearn_v2.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 import java.util.List;
 
@@ -60,6 +67,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
     private static Activity mActivity;
     private static Context mContext;
+    static final String logTag = "SettingActivity";
 
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
@@ -207,11 +215,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class AccountPreferenceFragment extends PreferenceFragment {
-        private Button btnChangeEmail, btnChangePassword, btnSendResetEmail, btnRemoveUser,
-                changeEmail, changePassword, sendEmail, remove, signOut, btnCancel;
+        private Button btnChangeName, btnChangeEmail, btnChangePassword, btnSendResetEmail, btnRemoveUser,
+                changeName, changeEmail, changePassword, sendEmail, remove, signOut, btnCancel;
 
-        private EditText oldEmail, newEmail, password, newPassword;
-        private TextInputLayout inputLayoutNewEmail;
+        private TextView oldEmail, oldName;
+        private EditText  newName, newEmail, passNameChange, password, newPassword;
+        private TextInputLayout inputLayoutNewName, inputLayoutNewEmail, inputLayoutErrorMsg;
         private ProgressBar progressBar;
         private FirebaseAuth auth;
         //get current user
@@ -247,40 +256,35 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState){
             View accountView = inflater.inflate(R.layout.fragment_account_settings, container, false);
-            btnChangeEmail = (Button) accountView.findViewById(R.id.change_email_button);
-            btnChangePassword = (Button) accountView.findViewById(R.id.change_password_button);
-            btnSendResetEmail = (Button) accountView.findViewById(R.id.sending_pass_reset_button);
-            btnRemoveUser = (Button) accountView.findViewById(R.id.remove_user_button);
-            btnCancel = (Button) accountView.findViewById(R.id.btn_cancel);
-            changeEmail = (Button) accountView.findViewById(R.id.changeEmail);
-            changePassword = (Button) accountView.findViewById(R.id.changePass);
-            sendEmail = (Button) accountView.findViewById(R.id.send);
-            remove = (Button) accountView.findViewById(R.id.remove);
-            signOut = (Button) accountView.findViewById(R.id.sign_out);
+            IntializeFields(accountView);
+            //Set visible field's values
+            oldName.setText(user.getDisplayName().toString());
+            oldEmail.setText(user.getEmail());
+            //animation
+            final Animation animShake = AnimationUtils.loadAnimation(mContext, R.anim.shake);
 
-            inputLayoutNewEmail = (TextInputLayout)accountView.findViewById(R.id.input_layout_new_email);
-
-            oldEmail = (EditText) accountView.findViewById(R.id.old_email);
-            newEmail = (EditText) accountView.findViewById(R.id.new_email);
-            password = (EditText) accountView.findViewById(R.id.password);
-            newPassword = (EditText) accountView.findViewById(R.id.newPassword);
-
-            progressBar = (ProgressBar) accountView.findViewById(R.id.progressBar);
-
-            oldEmail.setVisibility(View.GONE);
-            newEmail.setVisibility(View.GONE);
-            password.setVisibility(View.GONE);
-            newPassword.setVisibility(View.GONE);
-            changeEmail.setVisibility(View.GONE);
-            changePassword.setVisibility(View.GONE);
-            sendEmail.setVisibility(View.GONE);
-            remove.setVisibility(View.GONE);
-            btnCancel.setVisibility(View.GONE);
+            setIntialView();
+            btnChangeName.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+                    oldName.setVisibility(View.VISIBLE);
+                    newName.setVisibility(View.VISIBLE);
+                    passNameChange.setVisibility(View.VISIBLE);
+                    password.setVisibility(View.GONE);
+                    newPassword.setVisibility(View.GONE);
+                    changeName.setVisibility(View.VISIBLE);
+                    changePassword.setVisibility(View.GONE);
+                    sendEmail.setVisibility(View.GONE);
+                    remove.setVisibility(View.GONE);
+                    btnCancel.setVisibility(View.VISIBLE);
+                    toogleChangeButtons();
+                }
+            });
 
             btnChangeEmail.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    oldEmail.setVisibility(View.GONE);
+                    oldEmail.setVisibility(View.VISIBLE);
                     newEmail.setVisibility(View.VISIBLE);
                     password.setVisibility(View.GONE);
                     newPassword.setVisibility(View.GONE);
@@ -288,7 +292,62 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     changePassword.setVisibility(View.GONE);
                     sendEmail.setVisibility(View.GONE);
                     remove.setVisibility(View.GONE);
+                    btnChangeEmail.setVisibility(View.GONE);
                     btnCancel.setVisibility(View.VISIBLE);
+                    toogleChangeButtons();
+                }
+            });
+            btnCancel.setOnClickListener(new View.OnClickListener(){
+                 @Override
+                 public void onClick(View v) {
+                     toogleChangeButtons();
+                 }
+            } );
+            changeName.setOnClickListener(new View.OnClickListener(){
+
+                @Override
+                public void onClick(View v) {
+                    final String pwd = passNameChange.getText().toString().trim();
+                    if (TextUtils.isEmpty(pwd)) {
+                        changeName.startAnimation(animShake);
+                        inputLayoutErrorMsg.setError(getString(R.string.no_password_entered));
+                        return;
+                    }
+                    progressBar.setVisibility(View.VISIBLE);
+                    final String name = newName.getText().toString().trim();
+                    if(user != null && !name.equals("")){
+                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(name).build();
+                        user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()){
+                                    // the only way to show the name change is to re-authenticate user
+                                    AuthCredential credential = EmailAuthProvider
+                                            .getCredential(user.getEmail(), pwd);
+                                    user.reauthenticate(credential)
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if(task.isSuccessful()) {
+                                                        Log.d(logTag, "User re-authenticated.");
+                                                        oldName.setText(user.getDisplayName());
+                                                        newName.setText("");
+                                                        Toast.makeText(mActivity, "Your user name has " +
+                                                                "been updated", Toast.LENGTH_LONG).show();
+                                                        progressBar.setVisibility(View.GONE);
+                                                    }else{
+                                                        Log.d(logTag, "User could not be re-authenticated.");
+                                                        Toast.makeText(mActivity, "Log back in to see " +
+                                                                "your new name " , Toast.LENGTH_LONG).show();
+                                                    }
+                                                }
+                                            });
+                                }
+                            }
+                        });
+
+                    }
                 }
             });
             changeEmail.setOnClickListener(new View.OnClickListener() {
@@ -305,10 +364,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
-                                            Toast.makeText(mActivity, "Email address is updated. An email was sent to your new address", Toast.LENGTH_LONG).show();
+                                            oldEmail.setText(user.getEmail());
+                                            newEmail.setText("");
+                                            Toast.makeText(mActivity, "Email address is updated. An email was " +
+                                                    "sent to your new address", Toast.LENGTH_LONG).show();
                                             progressBar.setVisibility(View.GONE);
                                         } else {
                                             Toast.makeText(mActivity, "Failed to update email!", Toast.LENGTH_LONG).show();
+                                            Log.d(logTag, task.getException().getMessage());
                                             progressBar.setVisibility(View.GONE);
                                         }
                                     }
@@ -337,6 +400,84 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         //sign out method
         public void signOut() {
             auth.signOut();
+        }
+
+        private void toogleChangeButtons(){
+            if(btnCancel.isPressed()){
+                oldName.setVisibility(View.GONE);
+                newName.setVisibility(View.GONE);
+                passNameChange.setVisibility(View.GONE);
+                oldEmail.setVisibility(View.GONE);
+                newEmail.setVisibility(View.GONE);
+                password.setVisibility(View.GONE);
+                newPassword.setVisibility(View.GONE);
+                changeEmail.setVisibility(View.GONE);
+                changeName.setVisibility(View.GONE);
+                changePassword.setVisibility(View.GONE);
+                sendEmail.setVisibility(View.GONE);
+                remove.setVisibility(View.GONE);
+                btnCancel.setVisibility(View.GONE);
+                btnChangeName.setVisibility(View.VISIBLE);
+                btnChangeEmail.setVisibility(View.VISIBLE);
+                btnChangePassword.setVisibility(View.VISIBLE);
+                btnSendResetEmail.setVisibility(View.VISIBLE);
+                btnRemoveUser.setVisibility(View.VISIBLE);
+            }else {
+                btnChangeName.setVisibility(View.GONE);
+                btnChangeEmail.setVisibility(View.GONE);
+                btnChangePassword.setVisibility(View.GONE);
+                btnSendResetEmail.setVisibility(View.GONE);
+                btnRemoveUser.setVisibility(View.GONE);
+            }
+        }
+
+        private void IntializeFields(View accountView){
+            btnChangeName = (Button) accountView.findViewById(R.id.change_name_button);
+            btnChangeEmail = (Button) accountView.findViewById(R.id.change_email_button);
+            btnChangePassword = (Button) accountView.findViewById(R.id.change_password_button);
+            btnSendResetEmail = (Button) accountView.findViewById(R.id.sending_pass_reset_button);
+            btnRemoveUser = (Button) accountView.findViewById(R.id.remove_user_button);
+            btnCancel = (Button) accountView.findViewById(R.id.btn_cancel);
+            changeEmail = (Button) accountView.findViewById(R.id.changeEmail);
+            changeName = (Button) accountView.findViewById(R.id.changeName);
+            changePassword = (Button) accountView.findViewById(R.id.changePass);
+            sendEmail = (Button) accountView.findViewById(R.id.send);
+            remove = (Button) accountView.findViewById(R.id.remove);
+            signOut = (Button) accountView.findViewById(R.id.sign_out);
+
+            inputLayoutNewName = (TextInputLayout)accountView.findViewById(R.id.input_layout_new_name);
+            inputLayoutNewEmail = (TextInputLayout)accountView.findViewById(R.id.input_layout_new_email);
+
+            inputLayoutErrorMsg = (TextInputLayout)accountView.findViewById(R.id.auth_error_msg);
+
+
+            oldName = (TextView) accountView.findViewById(R.id.old_name);
+            oldEmail = (TextView) accountView.findViewById(R.id.old_email);
+
+            newName =  (EditText) accountView.findViewById(R.id.new_name);
+            newEmail = (EditText) accountView.findViewById(R.id.new_email);
+            passNameChange = (EditText) accountView.findViewById(R.id.password_for_new_name);
+            newEmail = (EditText) accountView.findViewById(R.id.new_email);
+            password = (EditText) accountView.findViewById(R.id.password);
+            newPassword = (EditText) accountView.findViewById(R.id.newPassword);
+
+            progressBar = (ProgressBar) accountView.findViewById(R.id.progressBar);
+        }
+
+        private void setIntialView(){
+            oldName.setVisibility(View.GONE);
+            newName.setVisibility(View.GONE);
+            passNameChange.setVisibility(View.GONE);
+            oldEmail.setVisibility(View.GONE);
+            newEmail.setVisibility(View.GONE);
+            password.setVisibility(View.GONE);
+            newPassword.setVisibility(View.GONE);
+            changeEmail.setVisibility(View.GONE);
+            changeName.setVisibility(View.GONE);
+            changePassword.setVisibility(View.GONE);
+            sendEmail.setVisibility(View.GONE);
+            remove.setVisibility(View.GONE);
+            btnCancel.setVisibility(View.GONE);
         }
 
         /*@Override
