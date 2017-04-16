@@ -24,13 +24,11 @@ public class UserManager {
 
     private FirebaseAuth auth;
     private boolean isUpdated = false;
+    public static boolean isGoogleAccount = false;
+    public static boolean isFacebookAccount = false;
 
     public static boolean isValidEmail(String email) {
         return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
-    }
-
-    public void test(Activity act){
-
     }
 
     public boolean updateUserName(FirebaseUser user,  String name) {
@@ -75,6 +73,19 @@ public class UserManager {
             return false;
         } else {
             inputLayoutPassword.setErrorEnabled(false);
+        }
+
+        return true;
+    }
+
+    public boolean isNameEmptyOrNotChanged(FirebaseUser user, EditText inputName, TextInputLayout inputLayoutName,
+                                           Context context, Activity activity) {
+        if (inputName.getText().toString().trim().isEmpty() || inputName.getText().toString().trim().equals(user.getDisplayName())) {
+            inputLayoutName.setError(context.getString(R.string.hint_change_name));
+            requestFocus(inputName, activity);
+            return false;
+        } else {
+            inputLayoutName.setErrorEnabled(false);
         }
 
         return true;

@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.j_rus.fliplearn.util.UserManager;
 import com.example.j_rus.flipnlearn_v2.R;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -79,13 +80,15 @@ public class MainActivity extends AppCompatActivity {
 
         MenuItem signOut = menu.findItem(R.id.action_sign_out);
         MenuItem signIn = menu.findItem(R.id.action_sign_in);
+        MenuItem settings = menu.findItem(R.id.action_settings);
         if(auth.getCurrentUser() != null){
             signOut.setVisible(true);
             signIn.setVisible(false);
+            settings.setVisible(true);
         }else{
             signIn.setVisible(true);
             signOut.setVisible(false);
-
+            settings.setVisible(false);
         }
         return true;
     }
@@ -117,7 +120,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             };
-
+            if(UserManager.isGoogleAccount == true){
+                UserManager.isGoogleAccount = false;
+            }
+            if(UserManager.isFacebookAccount == true){
+                UserManager.isFacebookAccount = false;
+            }
             authListener.onAuthStateChanged(auth);
             return true;
         }

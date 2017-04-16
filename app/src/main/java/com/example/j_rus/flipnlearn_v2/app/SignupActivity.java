@@ -56,7 +56,7 @@ public class SignupActivity extends AppCompatActivity {
 
         inputName = (EditText) findViewById(R.id.user_name);
         inputEmail = (EditText) findViewById(R.id.email);
-        inputPassword = (EditText) findViewById(R.id.password);
+        inputPassword = (EditText) findViewById(R.id.old_password);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         btnResetPassword = (Button) findViewById(R.id.btn_reset_password);
 
@@ -217,7 +217,7 @@ public class SignupActivity extends AppCompatActivity {
                     userManager.validateEmail(inputEmail, inputLayoutEmail, getApplicationContext(),
                             SignupActivity.this);
                     break;
-                case R.id.password:
+                case R.id.old_password:
                     userManager.validatePassword(inputPassword, inputLayoutPassword,
                             getApplicationContext(), SignupActivity.this);
                     break;
