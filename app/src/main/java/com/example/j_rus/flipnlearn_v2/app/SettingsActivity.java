@@ -4,6 +4,7 @@ package com.example.j_rus.flipnlearn_v2.app;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.Ringtone;
@@ -21,6 +22,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -216,12 +218,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class AccountPreferenceFragment extends PreferenceFragment {
         private Button btnChangeName, btnChangeEmail, btnChangePassword, btnSendResetEmail, btnRemoveUser,
-                changeName, changeEmail, changePassword, sendEmail, remove, signOut, btnCancel;
+                changeName, changeEmail, changePassword, sendEmail, btnRemove, btnLogOut, btnCancel;
 
         private TextView oldEmailTextView, oldNameTextView;
         private EditText newNameEditText, newEmailEditText, passNameChangeEditText, oldPasswordEditText, newPasswordEditText, confNewPasswordEditText;
         private TextInputLayout inputLayoutNewName, inputLayoutNewEmail, inputLayoutPasswordForName,
-                inputLayoutOldPassword, inputLayoutNameErrorMsg, inputLayoutErrorMsg;
+                inputLayoutOldPassword, inputLayoutNewPassword, inputLayoutConfNewPassword, inputLayoutNameErrorMsg, inputLayoutErrorMsg;
         private ProgressBar progressBar;
         private FirebaseAuth auth;
         //get current user
@@ -279,7 +281,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     changeName.setVisibility(View.VISIBLE);
                     changePassword.setVisibility(View.GONE);
                     sendEmail.setVisibility(View.GONE);
-                    remove.setVisibility(View.GONE);
+                    btnRemove.setVisibility(View.GONE);
                     btnCancel.setVisibility(View.VISIBLE);
                     toogleChangeButtons();
                 }
@@ -309,7 +311,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                     AuthCredential credential = EmailAuthProvider
                                             .getCredential(user.getEmail(), passNameChangeEditText.getText().toString().trim());
                                     user.reauthenticate(credential)
-                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if(task.isSuccessful()) {
@@ -348,7 +350,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     changeEmail.setVisibility(View.VISIBLE);
                     changePassword.setVisibility(View.GONE);
                     sendEmail.setVisibility(View.GONE);
-                    remove.setVisibility(View.GONE);
+                    btnRemove.setVisibility(View.GONE);
                     btnChangeEmail.setVisibility(View.GONE);
                     btnCancel.setVisibility(View.VISIBLE);
                     toogleChangeButtons();
@@ -358,15 +360,18 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             btnChangePassword.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
+                    inputLayoutOldPassword.setVisibility(View.VISIBLE);
+                    inputLayoutNewPassword.setVisibility(View.VISIBLE);
+                    inputLayoutConfNewPassword.setVisibility(View.VISIBLE);
                     oldEmailTextView.setVisibility(View.GONE);
                     newEmailEditText.setVisibility(View.GONE);
                     oldPasswordEditText.setVisibility(View.VISIBLE);
-                    newPasswordEditText.setVisibility(View.GONE);
-                    confNewPasswordEditText.setVisibility(View.GONE);
+                    newPasswordEditText.setVisibility(View.VISIBLE);
+                    confNewPasswordEditText.setVisibility(View.VISIBLE);
                     changeEmail.setVisibility(View.GONE);
                     changePassword.setVisibility(View.VISIBLE);
                     sendEmail.setVisibility(View.GONE);
-                    remove.setVisibility(View.GONE);
+                    btnRemove.setVisibility(View.GONE);
                     btnChangeEmail.setVisibility(View.GONE);
                     btnCancel.setVisibility(View.VISIBLE);
                     toogleChangeButtons();
@@ -416,37 +421,102 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             changePassword.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    final String pwd = oldPasswordEditText.getText().toString().trim();
-                    if(TextUtils.isEmpty(pwd)){
-                        changePassword.startAnimation(animShake);
-                        inputLayoutErrorMsg.setError(getString(R.string.no_password_entered));
+                    if(!userManager.validatePasswordFields(oldPasswordEditText, newPasswordEditText,
+                            confNewPasswordEditText, inputLayoutOldPassword, inputLayoutNewPassword,
+                            inputLayoutConfNewPassword, mContext, mActivity)){
                         return;
                     }
                     progressBar.setVisibility(View.VISIBLE);
-                    if (user != null && !newPasswordEditText.getText().toString().trim().equals("")) {
-                        if (newPasswordEditText.getText().toString().trim().length() < 6) {
-                            newPasswordEditText.setError("Password too short, enter minimum 6 characters");
-                            progressBar.setVisibility(View.GONE);
-                        } else {
-                            user.updatePassword(newPasswordEditText.getText().toString().trim())
+                    if(userManager.validatePassword(oldPasswordEditText, inputLayoutOldPassword, mContext, mActivity)){
+                        if(user != null && user.getEmail() != null){
+                            AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), oldPasswordEditText.getText().toString().trim());
+                            user.reauthenticate(credential)
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
+
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()) {
-                                                Toast.makeText(mActivity, "Password is updated, sign in with new old Password!", Toast.LENGTH_SHORT).show();
-                                                signOut();
+                                            if(task.isSuccessful()) {
+                                                if (!userManager.validatePassword(newPasswordEditText, inputLayoutNewPassword, mContext, mActivity)) {
+                                                    progressBar.setVisibility(View.GONE);
+                                                    return;
+                                                } else {
+                                                    user.updatePassword(newPasswordEditText.getText().toString().trim())
+                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if (task.isSuccessful()) {
+                                                                        Toast.makeText(mActivity, "Password is updated, sign in with new old Password!", Toast.LENGTH_LONG).show();
+                                                                        signOut();
+                                                                        progressBar.setVisibility(View.GONE);
+                                                                    } else {
+                                                                        Toast.makeText(mActivity, "Failed to update old Password!", Toast.LENGTH_LONG).show();
+                                                                        progressBar.setVisibility(View.GONE);
+                                                                    }
+                                                                }
+                                                            });
+                                                }
+                                            }else{
+                                                Toast.makeText(mActivity, "Failed to update password!", Toast.LENGTH_LONG).show();
+                                                Log.d(logTag, task.getException().getMessage());
                                                 progressBar.setVisibility(View.GONE);
-                                            } else {
-                                                Toast.makeText(mActivity, "Failed to update old Password!", Toast.LENGTH_SHORT).show();
-                                                progressBar.setVisibility(View.GONE);
+                                                inputLayoutOldPassword.setError("Your password is not valid, enter your current password");
+
                                             }
                                         }
                                     });
+                        }else{
+                            Toast.makeText(mActivity, "Your email address was not found: Contact your Admin", Toast.LENGTH_LONG).show();
+                            progressBar.setVisibility(View.GONE);
                         }
-                    } else if (newPasswordEditText.getText().toString().trim().equals("")) {
-                        newPasswordEditText.setError("Enter oldPasswordEditText");
+
+                    }else{
                         progressBar.setVisibility(View.GONE);
                     }
+                }
+            });
+            btnSendResetEmail.setOnClickListener(new View.OnClickListener(){
+
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(mActivity, ResetPasswordActivity.class));
+                }
+            });
+
+            btnRemoveUser.setOnClickListener(new View.OnClickListener(){
+
+                @Override
+                public void onClick(View v) {
+                    new AlertDialog.Builder(getActivity())
+                            .setTitle(R.string.delete_account_title)
+                            .setMessage(R.string.delete_acoount_msg)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    if (user != null) {
+                                        user.delete()
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if (task.isSuccessful()) {
+                                                        Toast.makeText(mActivity, "Your profile is deleted:( Create a account now!", Toast.LENGTH_LONG).show();
+                                                        mActivity.finish();
+                                                        startActivity(new Intent(mActivity, MainActivity.class));
+                                                    } else {
+                                                        Toast.makeText(mActivity, "Failed to delete your account!", Toast.LENGTH_LONG).show();
+                                                    }
+                                                }
+                                            });
+                                    }
+                                }})
+                            .setNegativeButton(android.R.string.no, null).show();
+                }
+            });
+
+            btnLogOut.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    signOut();
                 }
             });
             return accountView;
@@ -467,6 +537,20 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         //sign out method
         public void signOut() {
             auth.signOut();
+            // this listener will be called when there is change in firebase user session
+            FirebaseAuth.AuthStateListener authListener = new FirebaseAuth.AuthStateListener() {
+                @Override
+                public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                    FirebaseUser user = firebaseAuth.getCurrentUser();
+                    if (user == null) {
+                        // user auth state is changed - user is null
+                        // launch login activity
+                        mActivity.finish();
+                        startActivity(new Intent(mActivity, LoginActivity.class));
+                    }
+                }
+            };
+            authListener.onAuthStateChanged(auth);
         }
 
         private void toogleChangeButtons(){
@@ -483,18 +567,46 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 changeName.setVisibility(View.GONE);
                 changePassword.setVisibility(View.GONE);
                 sendEmail.setVisibility(View.GONE);
-                remove.setVisibility(View.GONE);
+                btnRemove.setVisibility(View.GONE);
                 btnCancel.setVisibility(View.GONE);
+
                 inputLayoutNewName.setVisibility(View.GONE);
                 inputLayoutNewEmail.setVisibility(View.GONE);
                 inputLayoutErrorMsg.setVisibility(View.GONE);
                 inputLayoutPasswordForName.setVisibility(View.GONE);
                 inputLayoutNameErrorMsg.setVisibility(View.GONE);
+                inputLayoutOldPassword.setVisibility(View.GONE);
+                inputLayoutNewPassword.setVisibility(View.GONE);
+                inputLayoutConfNewPassword.setVisibility(View.GONE);
+
                 btnChangeName.setVisibility(View.VISIBLE);
                 btnChangeEmail.setVisibility(View.VISIBLE);
                 btnChangePassword.setVisibility(View.VISIBLE);
                 btnSendResetEmail.setVisibility(View.VISIBLE);
                 btnRemoveUser.setVisibility(View.VISIBLE);
+
+                progressBar.setVisibility(View.GONE);
+
+                if(newNameEditText.getText() != null)
+                    newNameEditText.setText("");
+                if(passNameChangeEditText.getText() != null)
+                    passNameChangeEditText.setText("");
+                if(oldEmailTextView.getText() != null)
+                    oldEmailTextView.setText("");
+                if(newEmailEditText.getText() != null)
+                    newEmailEditText.setText("");
+                if(oldPasswordEditText.getText() != null)
+                    oldPasswordEditText.setText("");
+                if(newPasswordEditText.getText() != null)
+                    newPasswordEditText.setText("");
+                if(confNewPasswordEditText.getText() != null)
+                    confNewPasswordEditText.setText("");
+                if(inputLayoutOldPassword.getError() != null)
+                    inputLayoutOldPassword.setError("");
+                if(inputLayoutNewPassword.getError() != null)
+                    inputLayoutNewPassword.setError("");
+                if(inputLayoutConfNewPassword.getError() != null)
+                    inputLayoutConfNewPassword.setError("");
             }else {
                 btnChangeName.setVisibility(View.GONE);
                 btnChangeEmail.setVisibility(View.GONE);
@@ -515,13 +627,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             changeName = (Button) accountView.findViewById(R.id.changeName);
             changePassword = (Button) accountView.findViewById(R.id.changePass);
             sendEmail = (Button) accountView.findViewById(R.id.send);
-            remove = (Button) accountView.findViewById(R.id.remove);
-            signOut = (Button) accountView.findViewById(R.id.sign_out);
+            btnRemove = (Button) accountView.findViewById(R.id.remove);
+            btnLogOut = (Button) accountView.findViewById(R.id.sign_out);
 
             inputLayoutNewName = (TextInputLayout)accountView.findViewById(R.id.input_layout_new_name);
             inputLayoutNewEmail = (TextInputLayout)accountView.findViewById(R.id.input_layout_new_email);
-            inputLayoutOldPassword = (TextInputLayout)accountView.findViewById(R.id.input_layout_old_password);
             inputLayoutPasswordForName = (TextInputLayout) accountView.findViewById(R.id.input_layout_password_new_name);
+
+            inputLayoutOldPassword = (TextInputLayout)accountView.findViewById(R.id.input_layout_old_password);
+            inputLayoutNewPassword = (TextInputLayout)accountView.findViewById(R.id.input_layout_new_password);
+            inputLayoutConfNewPassword = (TextInputLayout)accountView.findViewById(R.id.input_layout_conf_new_password);
 
             inputLayoutNameErrorMsg = (TextInputLayout)accountView.findViewById(R.id.auth_name_error_msg);
             inputLayoutErrorMsg = (TextInputLayout)accountView.findViewById(R.id.auth_error_msg);
@@ -548,6 +663,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 btnChangePassword.setVisibility(View.GONE);
                 btnSendResetEmail.setVisibility(View.GONE);
             }
+            inputLayoutNewName.setVisibility(View.GONE);
+            inputLayoutNewEmail.setVisibility(View.GONE);
+            inputLayoutErrorMsg.setVisibility(View.GONE);
+            inputLayoutPasswordForName.setVisibility(View.GONE);
+            inputLayoutNameErrorMsg.setVisibility(View.GONE);
+            inputLayoutOldPassword.setVisibility(View.GONE);
+            inputLayoutNewPassword.setVisibility(View.GONE);
+            inputLayoutConfNewPassword.setVisibility(View.GONE);
+
             oldNameTextView.setVisibility(View.GONE);
             newNameEditText.setVisibility(View.GONE);
             passNameChangeEditText.setVisibility(View.GONE);
@@ -560,8 +684,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             changeName.setVisibility(View.GONE);
             changePassword.setVisibility(View.GONE);
             sendEmail.setVisibility(View.GONE);
-            remove.setVisibility(View.GONE);
+            btnRemove.setVisibility(View.GONE);
             btnCancel.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
         }
 
         /*@Override

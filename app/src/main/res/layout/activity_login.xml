@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fancy="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -71,15 +72,15 @@
         </android.support.design.widget.TextInputLayout>
 
         <!-- Login Button -->
-
         <Button
             android:id="@+id/btn_login"
-            android:layout_width="fill_parent"
-            android:layout_height="50dp"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
             android:layout_marginTop="10dip"
             android:background="@color/btn_bg"
             android:text="@string/btn_login"
             android:textColor="@android:color/black" />
+
         <android.support.design.widget.TextInputLayout
             android:id="@+id/sign_in_error_msg"
             android:layout_width="match_parent"
@@ -88,30 +89,55 @@
             android:textAlignment="center"/>
 
         <LinearLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:background="@color/colorPrimary"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <com.google.android.gms.common.SignInButton
+            <mehdi.sakout.fancybuttons.FancyButton
                 android:id="@+id/btn_google_login"
-                android:layout_width="150dp"
-                android:layout_height="34dp"
-                />
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                app:fb_defaultColor="#FFFFFF"
+                app:fb_fontIconSize="20sp"
+                app:fb_iconPaddingRight="23dp"
+                app:fb_iconPaddingLeft="8dp"
+                app:fb_iconResource="@drawable/google_icon_logo"
+                app:fb_iconPosition="left"
+                app:fb_radius="2dp"
+                app:fb_text="SIGN IN WITH GOOGLE "
+                app:fb_textColor="#000000"
+                app:fb_textFont="Roboto-Medium"
+                app:fb_textSize="14sp" />
 
-            <com.facebook.login.widget.LoginButton
+            <mehdi.sakout.fancybuttons.FancyButton
                 android:id="@+id/btn_facebook_login"
-                android:layout_width="150dp"
-                android:layout_height="500dp" />
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_marginTop="10dip"
+                android:paddingLeft="0dp"
+                android:paddingRight="0dp"
+                app:fb_defaultColor="#39579B"
+                app:fb_focusColor="#6183d2"
+                app:fb_fontIconSize="20sp"
+                app:fb_iconPaddingRight="16dp"
+                app:fb_iconPaddingTop="5dp"
+                app:fb_iconPaddingBottom="5dp"
+                app:fb_iconPosition="left"
+                app:fb_iconResource="@drawable/facebook_icon_logo"
+                app:fb_radius="2dp"
+                app:fb_text="SIGN IN WITH FACEBOOK"
+                app:fb_textColor="#ffffff"
+                app:fb_textSize="14sp" />
 
         </LinearLayout>
 
 
         <Button
             android:id="@+id/btn_reset_password"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dip"
             android:background="@null"
@@ -125,7 +151,7 @@
             android:id="@+id/btn_signup"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dip"
+            android:layout_marginTop="5dip"
             android:background="@null"
             android:text="@string/btn_link_to_register"
             android:textAllCaps="false"

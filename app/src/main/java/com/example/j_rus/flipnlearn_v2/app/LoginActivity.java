@@ -31,7 +31,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -52,7 +51,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private ProgressBar progressBar;
     private Button btnSignup, btnLogin, btnReset;
     private ImageButton btnClose;
-    private SignInButton btnGoogleSignIn;
+    private FancyButton btnGoogleSignIn;
     private FancyButton btnFbSignIn;
     private TextInputLayout inputLayoutErrorMsg;
     private GoogleApiClient mGoogleApiClient;
@@ -92,13 +91,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         btnSignup = (Button) findViewById(R.id.btn_signup);
         btnLogin = (Button) findViewById(R.id.btn_login);
-        btnGoogleSignIn = (SignInButton) findViewById(R.id.btn_google_login);
+        btnGoogleSignIn = (FancyButton) findViewById(R.id.btn_google_login);
         btnFbSignIn = (FancyButton) findViewById(R.id.btn_facebook_login);
         btnReset = (Button) findViewById(R.id.btn_reset_password);
         btnClose = (ImageButton) findViewById(R.id.btn_close_login);
         inputLayoutErrorMsg = (TextInputLayout) findViewById(R.id.sign_in_error_msg);
-
-        btnGoogleSignIn.setSize(btnGoogleSignIn.SIZE_STANDARD);
 
         //animation
         final Animation animShake = AnimationUtils.loadAnimation(this, R.anim.shake);

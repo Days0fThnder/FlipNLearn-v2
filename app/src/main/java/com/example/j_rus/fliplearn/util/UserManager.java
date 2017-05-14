@@ -64,6 +64,36 @@ public class UserManager {
         return true;
     }
 
+    public boolean validatePasswordFields(EditText oldPassword, EditText newPassword, EditText confNewPassword,
+                                          TextInputLayout inputLayoutOldPassword,TextInputLayout inputLayoutNewPassword,
+                                          TextInputLayout inputLayoutConfNewPassword, Context context, Activity activity){
+        if(TextUtils.isEmpty(oldPassword.getText().toString().trim())){
+            inputLayoutOldPassword.setError(context.getString(R.string.no_old_password_entered));
+            requestFocus(oldPassword, activity);
+            return false;
+        }
+        if(TextUtils.isEmpty(newPassword.getText().toString().trim())){
+            inputLayoutNewPassword.setError(context.getString(R.string.no_new_password_entered));
+            requestFocus(newPassword, activity);
+            return false;
+        }
+        if(TextUtils.isEmpty(confNewPassword.getText().toString().trim())){
+            inputLayoutConfNewPassword.setError(context.getString(R.string.no_conf_new_password_entered));
+            requestFocus(confNewPassword, activity);
+            return false;
+        }
+        if(!newPassword.getText().toString().trim().
+                equals(confNewPassword.getText().toString().trim())){
+            inputLayoutConfNewPassword.setError(context.getString(R.string.passwords_do_not_match));
+            return false;
+        }
+        if(oldPassword.getText().toString().trim().equals(newPassword.getText().toString().trim())){
+            inputLayoutNewPassword.setError(context.getString(R.string.new_password_match_old_password));
+            return false;
+        }
+        return true;
+    }
+
     public boolean validatePassword(EditText inputPassword, TextInputLayout inputLayoutPassword,
                                      Context context, Activity activity) {
         if (inputPassword.getText().toString().trim().isEmpty() || !inputPassword.getText().toString()
