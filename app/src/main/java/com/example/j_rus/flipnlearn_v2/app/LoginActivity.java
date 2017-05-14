@@ -26,7 +26,6 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -44,6 +43,8 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 import java.util.Arrays;
 
+import mehdi.sakout.fancybuttons.FancyButton;
+
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
     private EditText inputEmail, inputPassword;
@@ -52,7 +53,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private Button btnSignup, btnLogin, btnReset;
     private ImageButton btnClose;
     private SignInButton btnGoogleSignIn;
-    private LoginButton btnFbSignIn;
+    private FancyButton btnFbSignIn;
     private TextInputLayout inputLayoutErrorMsg;
     private GoogleApiClient mGoogleApiClient;
     private CallbackManager mCallbackManager;
@@ -92,16 +93,17 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         btnSignup = (Button) findViewById(R.id.btn_signup);
         btnLogin = (Button) findViewById(R.id.btn_login);
         btnGoogleSignIn = (SignInButton) findViewById(R.id.btn_google_login);
-        btnFbSignIn = (LoginButton) findViewById(R.id.btn_facebook_login);
+        btnFbSignIn = (FancyButton) findViewById(R.id.btn_facebook_login);
         btnReset = (Button) findViewById(R.id.btn_reset_password);
         btnClose = (ImageButton) findViewById(R.id.btn_close_login);
         inputLayoutErrorMsg = (TextInputLayout) findViewById(R.id.sign_in_error_msg);
+
+        btnGoogleSignIn.setSize(btnGoogleSignIn.SIZE_STANDARD);
 
         //animation
         final Animation animShake = AnimationUtils.loadAnimation(this, R.anim.shake);
 
 
-        btnFbSignIn.setHeight(750);
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
 
@@ -204,10 +206,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             @Override
             public void onClick(View v) {
                 finish();
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
             }
         });
 
         btnGoogleSignIn.setOnClickListener(this);
+        btnFbSignIn.setOnClickListener(this);
     }
 
     @Override
